@@ -1,0 +1,25 @@
+server:
+  port: 5060
+  servlet-path: /
+
+spring:
+  application:
+    name: e-auction-buyer-service
+  data:
+    mongodb:
+      uri: mongodb+srv://${mongo.user}:${mongo.pwd}@${mongo.host}:${mongo.port}/${mongo.db-name}?retryWrites=true&w=majority
+
+info:
+  app:
+    name: ${spring.application.name}
+  build:
+    version: ${project.version}
+
+app:
+  services:
+    seller-service:
+      scheme: http
+      host: localhost
+      port: 5050
+      product-search: /seller/show-products/{product-id}
+
