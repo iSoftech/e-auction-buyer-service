@@ -4,6 +4,7 @@ import com.cognizant.fse.eauction.buyer.common.RestApiController;
 import com.cognizant.fse.eauction.buyer.dto.BidBuyerRequest;
 import com.cognizant.fse.eauction.buyer.dto.BidBuyerResponse;
 import com.cognizant.fse.eauction.buyer.dto.BidRequest;
+import com.cognizant.fse.eauction.buyer.dto.BidResponse;
 import com.cognizant.fse.eauction.buyer.model.Bid;
 import com.cognizant.fse.eauction.buyer.model.Buyer;
 import com.cognizant.fse.eauction.buyer.service.BidService;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,20 +102,23 @@ public class BuyerController {
     })
     @GetMapping("show-bids/{product-id}")
     @ResponseBody
-    public ResponseEntity<List<BidBuyerResponse>> showBidsForProduct(@PathVariable("product-id") Integer productId) {
+    public ResponseEntity<List<BidResponse>> showBidsForProduct(@PathVariable("product-id") Integer productId) {
+        List<BidResponse> bidResponses = new ArrayList<>(0);
         List<Bid> bids = bidService.getAllBids(productId, true);
-        List<Integer> buyerIds = bids.stream().map(Bid::getBuyerId).collect(Collectors.toList());
-        Map<Integer, Buyer> buyerMap = buyerService.getBuyers(buyerIds);
-        List<BidBuyerResponse> bidBuyerResponses = new ArrayList<>(0);
-        bids.stream().forEach(bid -> {
-            BidBuyerResponse bidBuyerResponse = BidBuyerResponse.builder()
-                    .status(HttpStatus.OK)
-                    .bid(bid)
-                    .buyer(buyerMap.get(bid.getBuyerId()))
-                    .build();
-            bidBuyerResponses.add(bidBuyerResponse);
-        });
-        return ResponseEntity.ok(bidBuyerResponses);
+        if (CollectionUtils.isNotEmpty(bids)) {
+            List<Integer> buyerIds = bids.stream().map(Bid::getBuyerId).collect(Collectors.toList());
+            Map<Integer, Buyer> buyerMap = buyerService.getBuyers(buyerIds);
+            bids.stream().forEach(bid -> {
+                BidResponse bidBuyerResponse = BidResponse.builder()
+                        .id(bid.getId())
+                        .productId(bid.getProductId())
+                        .bidAmount(bid.getBidAmount())
+                        .buyer(buyerMap.get(bid.getBuyerId()))
+                        .build();
+                bidResponses.add(bidBuyerResponse);
+            });
+        }
+        return ResponseEntity.ok(bidResponses);
     }
 
     /**

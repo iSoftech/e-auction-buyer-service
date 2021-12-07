@@ -7,7 +7,6 @@ import com.cognizant.fse.eauction.buyer.model.Bid;
 import com.cognizant.fse.eauction.buyer.repo.BidRepository;
 import com.cognizant.fse.eauction.buyer.service.BidService;
 import com.cognizant.fse.eauction.buyer.service.SequenceService;
-import static com.cognizant.fse.eauction.buyer.util.BuyerHelper.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -25,6 +24,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.annotation.Resource;
 import java.net.URI;
 import java.util.*;
+
+import static com.cognizant.fse.eauction.buyer.util.BuyerHelper.*;
 
 /**
  * Bid Service Implementation Class to manage Bid Details
@@ -158,7 +159,6 @@ public class BidServiceImpl implements BidService {
             HttpHeaders headers = new HttpHeaders();
             headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<String> httpEntity = new HttpEntity<>(headers);
 
             Map<String, Integer> params = new HashMap<>();
@@ -174,7 +174,8 @@ public class BidServiceImpl implements BidService {
             // Invokes Seller Service to retrieve Product
             ResponseEntity<Product> responseEntity = restTemplate.exchange(endpointUri, HttpMethod.GET,
                     httpEntity, Product.class);
-            if (responseEntity.getStatusCode().is2xxSuccessful() && responseEntity.hasBody()) {
+            if (responseEntity.getStatusCode().is2xxSuccessful()
+                    && responseEntity.hasBody()) {
                 product = responseEntity.getBody();
             }
         }
