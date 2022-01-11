@@ -68,7 +68,7 @@ public class BuyerController {
     /**
      * Returns all Bids for the given Buyer
      *
-     * @param buyerId refers to attribute {@code buyerId}
+     * @param buyerEmail refers to attribute {@code email}
      * @return a {@link List} of type {@link Bid}
      */
     @ApiOperation(value = "Show all Bids for an existing Buyer", response = Bid.class)
@@ -79,10 +79,11 @@ public class BuyerController {
             @ApiResponse(code = 404, message = "Bid not found"),
             @ApiResponse(code = 500, message = "Internal Server Error"),
     })
-    @GetMapping("{buyer-id}/show-bids")
+    @GetMapping("{buyer-email}/show-bids")
     @ResponseBody
-    public ResponseEntity<List<Bid>> showBidsByBuyerId(@PathVariable("buyer-id") Integer buyerId) {
-        List<Bid> bids = bidService.getAllBids(buyerId, false);
+    public ResponseEntity<List<Bid>> showBidsByBuyerId(@PathVariable("buyer-email") String buyerEmail) {
+        Buyer buyer = buyerService.getBuyer(buyerEmail);
+        List<Bid> bids = bidService.getAllBids(buyer.getId(), false);
         return ResponseEntity.ok(bids);
     }
 
@@ -151,7 +152,7 @@ public class BuyerController {
     /**
      * Returns the newly added Bid
      *
-     * @param buyerId refers to attribute {@code buyerId}
+     * @param buyerEmail refers to attribute {@code email}
      * @param bidRequest of type {@link BidRequest}
      * @return the newly added bid of type {@link Bid}
      */
@@ -163,14 +164,15 @@ public class BuyerController {
             @ApiResponse(code = 404, message = "Bid not found"),
             @ApiResponse(code = 500, message = "Internal Server Error"),
     })
-    @PostMapping("/{buyer-id}/place-bid")
+    @PostMapping("/{buyer-email}/place-bid")
     @ResponseBody
-    public ResponseEntity<Bid> placeBidByBuyer(@PathVariable("buyer-id") Integer buyerId,
+    public ResponseEntity<Bid> placeBidByBuyer(@PathVariable("buyer-email") String buyerEmail,
                                                @Validated @RequestBody final BidRequest bidRequest) {
+        Buyer buyer = buyerService.getBuyer(buyerEmail);
         Bid bid = Bid.builder()
                 .productId(bidRequest.getProductId())
                 .bidAmount(bidRequest.getBidAmount())
-                .buyerId(buyerId).build();
+                .buyerId(buyer.getId()).build();
         Bid newBid = bidService.addBid(bid);
         return ResponseEntity.ok(newBid);
     }
